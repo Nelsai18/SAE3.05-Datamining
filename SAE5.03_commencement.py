@@ -28,7 +28,7 @@ from sklearn.utils import resample
 
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, roc_auc_score
 
-
+#Les differentes librairies
 
 ## Jeu de données sur Titanic (objectif : prédire la survie)
 import seaborn as sns
@@ -138,3 +138,4 @@ if 'fare' in titanic.columns:
     plt.ylim(0, 300)
     plt.title('Age vs Fare colored by Survived')
     plt.show()
+

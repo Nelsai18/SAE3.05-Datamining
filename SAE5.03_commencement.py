@@ -67,12 +67,47 @@ variables_table = pd.DataFrame([
     ("alone","True si voyage seul","Booléenne"),
 ], columns=["Nom","Description","Type"])
 # print(variables_table)
+# variables non significatives selon l'article : 'sibsp','parch', 'embarked'
 
-# on va utiliser : survived, pclass, sex, age, 'sibsp','parch', 'embarked'
+# on va utiliser : survived, pclass, sex, age, fare, who, deck, alive, embark_town, alone
 
 # Sélection des variables pertinentes
-data = titanic[['survived', 'pclass', 'sex', 'age', 'sibsp', 'parch', 'embarked','fare']].dropna()
+data = titanic[['survived', 'pclass', 'sex', 'age','fare','who','deck','alive','embark_town','alone']].dropna()
+print(data.head())
 # [712 rows x 7 columns]
+
+
+
+## Nettoyage et pipeline de preprocessing
+
+X = data[['pclass', 'sex', 'age','fare','who','deck','alive','embark_town','alone']]  # juste les features
+y = data['survived']
+
+numeric_features = ['age','fare']
+numeric_transformer = Pipeline(steps=[
+    ('imputer', SimpleImputer(strategy='median')),
+    ('scaler', StandardScaler())
+])
+
+categorical_features = ['pclass', 'sex', 'who','deck','alive','embark_town','alone']
+categorical_transformer = Pipeline(steps=[
+    ('imputer', SimpleImputer(strategy='most_frequent')),
+    ('onehot', OneHotEncoder(handle_unknown='ignore'))
+])
+
+preprocessor = ColumnTransformer(
+    transformers=[
+        ('num', numeric_transformer, numeric_features),
+        ('cat', categorical_transformer, categorical_features)
+    ])
+# preprocessor : C’est un objet qui combine toutes les transformations à appliquer aux données avant de les donner au modèle
+
+# Petit test : transformer X pour voir les feature names
+preprocessor.fit(X)
+ohe_cols = preprocessor.named_transformers_['cat']['onehot'].get_feature_names_out(categorical_features)
+feature_names = numeric_features + list(ohe_cols)
+print("\nFeatures après transformation (extrait) :", feature_names)
+
 
 ## Exploration & dataviz (quelques graphiques essentiels)
 

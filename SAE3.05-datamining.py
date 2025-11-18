@@ -119,6 +119,14 @@ plt.title('Distribution des âges (titanic)')
 plt.xlabel('Age')
 plt.show()
 
+# Histogramme des prix des billets (2.4.1-tri a plat)
+plt.figure(figsize=(6,4))
+# sns.histplot(titanic['fare'], kde=True)
+sns.distplot(titanic['fare'], kde=True)
+plt.title('Distribution des Prix du billet (livre sterling)')
+plt.xlabel('Prix du billet (livre sterling)')
+plt.show()
+
 # Surive en fonction du sexe (2.4.2-tri croisé)
 plt.figure(figsize=(8,4))
 sns.countplot(data=titanic, x='sex', hue='survived')
@@ -370,4 +378,5 @@ plt.show()
 """
 
 ## Le modèle fait un bon travail globalement.
+
 

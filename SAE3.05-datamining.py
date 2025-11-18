@@ -167,22 +167,95 @@ if 'fare' in titanic.columns:
 # rajouter d'autres tris à plats, tri croisé(faire avec un pair plot)on doit faire des graphique original qui sorte de l’ordinaire()
 
 
-## 6.Détection d’anomalies (2.3)
-num_for_iso = titanic[['age','fare','sibsp','parch']].copy()
-num_for_iso = num_for_iso.fillna(num_for_iso.median())
+## 6.Détection d’anomalies (2.3) et Visualisation
 
-iso = IsolationForest(contamination=0.02, random_state=42) # IsolationForest est un algorithme pour détecter les valeurs atypiques.
-iso.fit(num_for_iso)
-outliers = iso.predict(num_for_iso) == -1
-titanic['is_outlier'] = outliers
+"""
+début
+"""
+# 1. Préparation des données pour IsolationForest (utiliser le dataset complet imputé)
+# Utiliser le dataset 'titanic' original et imputer les NA pour la détection
+num_for_iso = titanic[['age','fare', 'survived']].copy()
+# Imputation des valeurs manquantes avec la médiane (approche souvent utilisée avant IsolationForest)
+num_for_iso['age'] = num_for_iso['age'].fillna(num_for_iso['age'].median())
+num_for_iso['fare'] = num_for_iso['fare'].fillna(num_for_iso['fare'].median())
 
-print("Nombre d'outliers détectés:", outliers.sum())
+# 2. Application de IsolationForest
+iso = IsolationForest(contamination=0.02, random_state=42) # Contamination = 2% d'outliers
+iso.fit(num_for_iso[['age', 'fare']])
+
+# La fonction predict retourne 1 pour les inliers (points normaux) et -1 pour les outliers (anomalies)
+# On crée une colonne booléenne 'is_outlier'
+num_for_iso['is_outlier'] = iso.predict(num_for_iso[['age', 'fare']]) == -1
+
+# NOUVEAU: Convertir la colonne booléenne en catégories explicites pour une meilleure légende
+num_for_iso['outlier_category'] = num_for_iso['is_outlier'].map({True: 'Outlier (Rouge)', False: 'Normal (Bleu)'})
+
+print(f"\nNombre total d'outliers détectés (contamination=0.02): {num_for_iso['is_outlier'].sum()}")
+
+
+# 3. Visualisation avec les couleurs personnalisées
+plt.figure(figsize=(9, 6))
+
+# Définition de la palette avec les noms de catégories explicites
+custom_palette = {'Normal (Bleu)': 'blue', 'Outlier (Rouge)': 'red'}
+
+# Création du nuage de points
+sns.scatterplot(
+    data=num_for_iso,
+    x='age',
+    y='fare',
+    # **UTILISATION DE LA NOUVELLE COLONNE POUR LA LÉGENDE**
+    hue='outlier_category',
+    alpha=0.7,
+    palette=custom_palette,
+    s=50 # Taille des points
+)
+
+plt.ylim(0, 300)
+plt.title('Age vs Fare avec Outliers détectés par IsolationForest (Rouge)')
+# La légende est maintenant générée automatiquement par seaborn avec les bonnes étiquettes
+plt.xlabel('Âge')
+plt.ylabel('Prix du Billet (Fare)')
+plt.grid(True, linestyle='--', alpha=0.5)
+plt.show()
+
+"""
+# =========================================================================
+# AJOUT POUR EXPLIQUER LA DIFFÉRENCE ENTRE 18 OUTLIERS ET 15 POINTS ROUGES
+# =========================================================================
+print("\n--- Analyse des Outliers ---")
+outliers_df = num_for_iso[num_for_iso['is_outlier'] == True][['age', 'fare', 'survived']]
+print(f"Les 18 outliers détectés (Âge, Tarif, Survie) :")
+print(outliers_df)
+
+# Compter le nombre de points uniques basés sur (age, fare) parmi les outliers
+unique_outliers = outliers_df[['age', 'fare']].drop_duplicates()
+print(f"\nNombre de coordonnées (Âge, Tarif) uniques pour les outliers : {len(unique_outliers)}")
+
+# Afficher les doublons (qui expliquent les points manquants sur le graphique)
+duplicates = outliers_df[outliers_df.duplicated(subset=['age', 'fare'], keep=False)]
+if not duplicates.empty:
+    print("\nCoordonnées des outliers qui se chevauchent (tracés les uns sur les autres) :")
+    print(duplicates.sort_values(by=['age', 'fare']))
+else:
+    print("\nAucun doublon exact trouvé dans les coordonnées (Âge, Tarif).")
+# =========================================================================
+""""
+"""
+fin
+"""
+
 # Visualiser outliers sur fare
 plt.figure(figsize=(6,4))
 sns.boxplot(x=titanic['fare'])
 plt.title('Fare boxplot (outliers visibles)')
 plt.show()
 
+# Visualiser outliers sur Age
+plt.figure(figsize=(6,4))
+sns.boxplot(x=titanic['age'])
+plt.title('Age boxplot (outliers visibles)')
+plt.show()
 
 
 ## 7.Bootstrap : estimation d’un IC (exemple : proportion de survie, et moyenne d’âge)
@@ -378,5 +451,6 @@ plt.show()
 """
 
 ## Le modèle fait un bon travail globalement.
+
 
 

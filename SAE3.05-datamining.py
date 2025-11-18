@@ -38,17 +38,17 @@ print("# Colonnes du dataset Titanic :")
 print(titanic.columns.tolist())
 # 'survived', 'pclass', 'sex', 'age', 'sibsp', 'parch', 'fare','embarked', 'class', 'who', 'adult_male', 'deck', 'embark_town','alive', 'alone'
 
-## 4.Description rapide et qualité des données
+## 4.Description rapide et qualité des données (2)
 # Aperçu des colonnes et des valeurs manquantes
 print("\n--- Info dataset ---")
 titanic.info()
 
-# Calcul des % de NA
+# Calcul des % de NA (2.2-missing values)
 na_pct = titanic.isna().mean().round(3) * 100
 print(na_pct[na_pct>0])
 
 
-# Tableau récapitulatif des variables
+# Tableau récapitulatif des variables (2.1)
 variables_table = pd.DataFrame([
     ("survived","Indique si le passager a survécu (1) ou non (0)","Numérique binaire"),
     ("pclass","Classe du billet : 1,2,3 (statut social)","Numérique ordinale"),
@@ -67,27 +67,29 @@ variables_table = pd.DataFrame([
     ("alone","True si voyage seul","Booléenne"),
 ], columns=["Nom","Description","Type"])
 # print(variables_table)
+# variables non significatives selon l'article : 'sibsp','parch', 'embarked'
 
-# on va utiliser : survived, pclass, sex, age, 'sibsp','parch', 'embarked'
+# on va utiliser : survived, pclass, sex, age, fare, who, alive, embark_town, alone
 
 # Sélection des variables pertinentes
-data = titanic[['survived', 'pclass', 'sex', 'age', 'sibsp', 'parch', 'embarked','fare']].dropna()
-# [712 rows x 7 columns]
+data = titanic[['survived', 'pclass', 'sex', 'age','fare','who','alive','embark_town','alone']].dropna()
+print(data.head())
+# [712 rows x 9 columns]
 
 
 
 ## Nettoyage et pipeline de preprocessing
 
-X = data[['pclass', 'sex', 'age', 'sibsp', 'parch', 'fare','embarked']]  # juste les features
+X = data[['pclass', 'sex', 'age','fare','who','alive','embark_town','alone']]  # juste les features
 y = data['survived']
 
-numeric_features = ['age', 'sibsp', 'parch','fare']
+numeric_features = ['age','fare']
 numeric_transformer = Pipeline(steps=[
     ('imputer', SimpleImputer(strategy='median')),
     ('scaler', StandardScaler())
 ])
 
-categorical_features = ['pclass', 'sex', 'embarked']
+categorical_features = ['pclass', 'sex', 'who','alive','embark_town','alone']
 categorical_transformer = Pipeline(steps=[
     ('imputer', SimpleImputer(strategy='most_frequent')),
     ('onehot', OneHotEncoder(handle_unknown='ignore'))
@@ -107,22 +109,23 @@ feature_names = numeric_features + list(ohe_cols)
 print("\nFeatures après transformation (extrait) :", feature_names)
 
 
-## Exploration & dataviz (quelques graphiques essentiels)
+## Exploration & dataviz (quelques graphiques essentiels) (2.4)
 
-# Histogramme des ages
+# Histogramme des ages (2.4.1-tri a plat)
 plt.figure(figsize=(6,4))
-sns.histplot(titanic['age'], kde=True)
+# sns.histplot(titanic['age'], kde=True)
+sns.distplot(titanic['age'], kde=True)
 plt.title('Distribution des âges (titanic)')
 plt.xlabel('Age')
 plt.show()
 
-# Surive en fonction du sexe
+# Surive en fonction du sexe (2.4.2-tri croisé)
 plt.figure(figsize=(8,4))
 sns.countplot(data=titanic, x='sex', hue='survived')
 plt.title('Survie par sexe')
 plt.show()
 
-# Surive par classe
+# Surive par classe (2.4.2-tri croisé)
 plt.figure(figsize=(8,4))
 sns.countplot(data=titanic, x='pclass', hue='survived')
 plt.title('Survie par classe')
@@ -137,9 +140,10 @@ if 'fare' in titanic.columns:
     plt.title('Age vs Fare colored by Survived')
     plt.show()
 
+# rajouter d'autres tris à plats, tri croisé(faire avec un pair plot)on doit faire des graphique original qui sorte de l’ordinaire()
 
 
-## 6.Détection d’anomalies
+## 6.Détection d’anomalies (2.3)
 num_for_iso = titanic[['age','fare','sibsp','parch']].copy()
 num_for_iso = num_for_iso.fillna(num_for_iso.median())
 

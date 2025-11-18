@@ -131,6 +131,22 @@ sns.countplot(data=titanic, x='pclass', hue='survived')
 plt.title('Survie par classe')
 plt.show()
 
+# Sélection des variables numériques et de la variable cible pour le pair plot
+cols_for_pairplot = ['age', 'fare','survived']
+
+# Conversion de 'survived' en type catégoriel pour une meilleure légende
+# Copie du sous-ensemble de données pour éviter un SettingWithCopyWarning
+data_pairplot = data[cols_for_pairplot].copy() 
+data_pairplot['survived'] = data_pairplot['survived'].astype('category')
+data_pairplot['survived'] = data_pairplot['survived'].cat.rename_categories({0: 'Non Survécu', 1: 'Survécu'})
+
+# Génération du Pair Plot
+# hue='survived' colore les points en fonction de la variable cible
+# Les histogrammes sur la diagonale sont remplacés par des KDE (courbes de densité)
+sns.pairplot(data_pairplot, hue='survived', diag_kind='kde')
+plt.suptitle('Pair Plot des variables numériques coloré par la Survie', y=1.02)
+plt.show()
+
 # Nuage de points
 plt.figure(figsize=(7,5))
 # On remplace les NA de fare par median juste pour l'affichage si besoin
@@ -354,3 +370,4 @@ plt.show()
 """
 
 ## Le modèle fait un bon travail globalement.
+

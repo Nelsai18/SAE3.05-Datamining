@@ -114,15 +114,25 @@ print("\nFeatures après transformation (extrait) :", feature_names)
 # Histogramme des ages (2.4.1-tri a plat)
 plt.figure(figsize=(6,4))
 # sns.histplot(titanic['age'], kde=True)
-sns.distplot(titanic['age'], kde=True)
+sns.histplot(titanic['age'], kde=True)
 plt.title('Distribution des âges (titanic)')
 plt.xlabel('Age')
 plt.show()
 
+# Statistiques descriptives de la variable numérique 'fare'
+print("\nStatistiques descriptives du prix du billet (Fare en livres sterling) :")
+fare_stats = data['fare'].describe().round(2)
+print(fare_stats)
+
+print("\nAnalyse des prix :")
+print(f"Le prix le plus cher (Max) est : {fare_stats['max']} £.")
+print(f"Le prix minimum (Min) est : {fare_stats['min']} £. Un prix de 0.0 indique des passagers (souvent l'équipage ou des invités) n'ayant pas payé un tarif pour le billet.")
+print(f"La moitié des passagers a payé moins de : {fare_stats['50%']} £ (Médiane).")
+
 # Histogramme des prix des billets (2.4.1-tri a plat)
 plt.figure(figsize=(6,4))
 # sns.histplot(titanic['fare'], kde=True)
-sns.distplot(titanic['fare'], kde=True)
+sns.histplot(titanic['fare'], kde=True)
 plt.title('Distribution des Prix du billet (livre sterling)')
 plt.xlabel('Prix du billet (livre sterling)')
 plt.show()
@@ -451,6 +461,7 @@ plt.show()
 """
 
 ## Le modèle fait un bon travail globalement.
+
 
 
 
